@@ -17,8 +17,8 @@ class GameScene: SKScene {
     let player = SKSpriteNode(imageNamed: "Player")
     
     // Jumping
-    var jumpVelocity: CGFloat = 0
     var playerIsOnTheGround = true
+    var jumpVelocity: CGFloat = 0
     var jumpAudioPlayer: AVAudioPlayer!
     
     override func didMove(to view: SKView) {
@@ -43,9 +43,9 @@ class GameScene: SKScene {
         self.addChild(player)
         
         // Clouds
-        addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.1, y: self.size.height * 0.8), scale: 1.5)
-        addCloud(named: "cloud2", at: CGPoint(x: self.size.width * 0.6, y: self.size.height * 0.65), scale: 2)
-        addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
+        addCloud(named: "cloud1", at: CGPoint(x: size.width * 0.1, y: size.height * 0.8), scale: 1.5)
+        addCloud(named: "cloud2", at: CGPoint(x: size.width * 0.6, y: size.height * 0.65), scale: 2)
+        addCloud(named: "cloud3", at: CGPoint(x: size.width * 0.5, y: size.height * 0.45), scale: 2.5)
         
         // Audio
         prepareJumpSound()
@@ -103,7 +103,7 @@ class GameScene: SKScene {
         if playerIsOnTheGround {
             jumpVelocity = initialVelocity
             playerIsOnTheGround = false
-            jumpAudioPlayer?.play()
+            jumpAudioPlayer.play()
         }
     }
     
