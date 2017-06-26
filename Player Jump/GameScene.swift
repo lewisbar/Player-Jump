@@ -36,7 +36,7 @@ class GameScene: SKScene {
         self.addChild(player)
         
         // Clouds
-        addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.3, y: self.size.height * 0.8), scale: 1.5)
+        addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.1, y: self.size.height * 0.8), scale: 1.5)
         addCloud(named: "cloud2", at: CGPoint(x: self.size.width * 0.6, y: self.size.height * 0.65), scale: 2)
         addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
     }
@@ -68,9 +68,9 @@ class GameScene: SKScene {
         let cloud2 = childNode(withName: "cloud2") as! SKSpriteNode
         let cloud3 = childNode(withName: "cloud3") as! SKSpriteNode
         
-        cloud1.position.x += 2
-        cloud2.position.x += 1
-        cloud3.position.x += 1.5
+        cloud1.position.x += 1.5
+        cloud2.position.x += 2
+        cloud3.position.x += 1
         
         let clouds = [cloud1, cloud2, cloud3]
         for cloud in clouds {
