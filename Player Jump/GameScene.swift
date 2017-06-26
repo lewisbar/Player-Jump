@@ -7,6 +7,7 @@
 //
 
 import SpriteKit
+import AVFoundation
 
 class GameScene: SKScene {
     
@@ -15,6 +16,8 @@ class GameScene: SKScene {
     let player = SKSpriteNode(imageNamed: "Player")
     var velocity: CGFloat = 0
     var playerIsOnTheGround = true
+    var audioURL: URL?
+    var jumpAudioPlayer: AVAudioPlayer?
     
     override func didMove(to view: SKView) {
         
@@ -41,6 +44,9 @@ class GameScene: SKScene {
         addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.1, y: self.size.height * 0.8), scale: 1.5)
         addCloud(named: "cloud2", at: CGPoint(x: self.size.width * 0.6, y: self.size.height * 0.65), scale: 2)
         addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
+        
+        // Audio
+        audioURL = Bundle.main.url(forResource: "Jump", withExtension: "wav")
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -95,6 +101,7 @@ class GameScene: SKScene {
         if playerIsOnTheGround {
             velocity = initialVelocity
             playerIsOnTheGround = false
+            playJumpSound()
         }
     }
     
@@ -106,5 +113,16 @@ class GameScene: SKScene {
             velocity = 0
             playerIsOnTheGround = true
         }
+    }
+    
+    func playJumpSound() {
+        do {
+            jumpAudioPlayer = try AVAudioPlayer(contentsOf: audioURL!)
+        } catch {
+            print("Audio file not found")
+        }
+        jumpAudioPlayer?.numberOfLoops = 1
+        jumpAudioPlayer?.prepareToPlay()
+        jumpAudioPlayer?.play()
     }
 }
