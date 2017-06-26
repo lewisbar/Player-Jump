@@ -11,13 +11,15 @@ import AVFoundation
 
 class GameScene: SKScene {
     
+    // Nodes
     let ground1 = SKSpriteNode(imageNamed: "Bottom")
     let ground2 = SKSpriteNode(imageNamed: "Bottom")
     let player = SKSpriteNode(imageNamed: "Player")
-    var velocity: CGFloat = 0
+    
+    // Jumping
+    var jumpVelocity: CGFloat = 0
     var playerIsOnTheGround = true
-    var audioURL: URL?
-    var jumpAudioPlayer: AVAudioPlayer?
+    var jumpAudioPlayer: AVAudioPlayer!
     
     override func didMove(to view: SKView) {
         
@@ -46,7 +48,7 @@ class GameScene: SKScene {
         addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
         
         // Audio
-        audioURL = Bundle.main.url(forResource: "Jump", withExtension: "wav")
+        prepareJumpSound()
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -99,30 +101,30 @@ class GameScene: SKScene {
     
     func initiateJump(initialVelocity: CGFloat) {
         if playerIsOnTheGround {
-            velocity = initialVelocity
+            jumpVelocity = initialVelocity
             playerIsOnTheGround = false
-            playJumpSound()
+            jumpAudioPlayer?.play()
         }
     }
     
     func updateJumpMotion(slowDown: CGFloat) {
-        velocity -= slowDown
-        player.position.y += velocity
+        jumpVelocity -= slowDown
+        player.position.y += jumpVelocity
         if player.position.y <= ground1.size.height {
             player.position.y = ground1.size.height
-            velocity = 0
+            jumpVelocity = 0
             playerIsOnTheGround = true
         }
     }
     
-    func playJumpSound() {
+    func prepareJumpSound() {
+        let jumpAudioURL = Bundle.main.url(forResource: "Jump", withExtension: "wav")
         do {
-            jumpAudioPlayer = try AVAudioPlayer(contentsOf: audioURL!)
+            jumpAudioPlayer = try AVAudioPlayer(contentsOf: jumpAudioURL!)
         } catch {
             print("Audio file not found")
         }
-        jumpAudioPlayer?.numberOfLoops = 1
-        jumpAudioPlayer?.prepareToPlay()
-        jumpAudioPlayer?.play()
+        jumpAudioPlayer.numberOfLoops = 1
+        jumpAudioPlayer.prepareToPlay()
     }
 }
