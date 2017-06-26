@@ -10,28 +10,30 @@ import SpriteKit
 
 class GameScene: SKScene {
     
-    let bottom1 = SKSpriteNode(imageNamed: "Bottom")
-    let bottom2 = SKSpriteNode(imageNamed: "Bottom")
-    
+    let ground1 = SKSpriteNode(imageNamed: "Bottom")
+    let ground2 = SKSpriteNode(imageNamed: "Bottom")
     let player = SKSpriteNode(imageNamed: "Player")
+    var velocity: CGFloat = 0
+    var playerIsOnTheGround = true
     
     override func didMove(to view: SKView) {
         
         // Background
         self.backgroundColor = SKColor.lightGray
         
-        bottom1.anchorPoint = CGPoint.zero
-        bottom1.position = CGPoint.zero
-        bottom1.zPosition = 1
-        self.addChild(bottom1)
+        // Ground
+        ground1.anchorPoint = CGPoint.zero
+        ground1.position = CGPoint.zero
+        ground1.zPosition = 1
+        self.addChild(ground1)
         
-        bottom2.anchorPoint = CGPoint.zero
-        bottom2.position = CGPoint(x: bottom1.size.width - 1, y: 0)
-        bottom2.zPosition = 1
-        self.addChild(bottom2)
+        ground2.anchorPoint = CGPoint.zero
+        ground2.position = CGPoint(x: ground1.size.width - 1, y: 0)
+        ground2.zPosition = 1
+        self.addChild(ground2)
         
         // Player
-        player.position = CGPoint(x: player.size.width / 2, y: bottom1.size.height + player.size.height / 2)
+        player.position = CGPoint(x: player.size.width, y: ground1.size.height + player.size.height / 2)
         player.zPosition = 2
         self.addChild(player)
         
@@ -39,6 +41,17 @@ class GameScene: SKScene {
         addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.1, y: self.size.height * 0.8), scale: 1.5)
         addCloud(named: "cloud2", at: CGPoint(x: self.size.width * 0.6, y: self.size.height * 0.65), scale: 2)
         addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        player.zRotation -= CGFloat.pi * 5 / 180
+        moveGroundLeft(points: 4)
+        moveCloudsRight(cloud1Speed: 1.5, cloud2Speed: 2, cloud3Speed: 1)
+        updateJumpMotion(slowDown: 0.6)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        initiateJump(initialVelocity: 16)
     }
     
     func addCloud(named name: String, at position: CGPoint, scale: CGFloat) {
@@ -50,33 +63,48 @@ class GameScene: SKScene {
         self.addChild(cloud)
     }
     
-    override func update(_ currentTime: TimeInterval) {
-        player.zRotation -= CGFloat.pi * 5 / 180
+    func moveGroundLeft(points: CGFloat) {
+        ground1.position.x -= points
+        ground2.position.x -= points
         
-        // Move floor
-        bottom1.position.x -= 4
-        bottom2.position.x -= 4
-        
-        if bottom1.position.x < -bottom1.size.width {
-            bottom1.position.x = bottom2.position.x + bottom2.size.width
-        } else if bottom2.position.x < -bottom2.size.width {
-            bottom2.position.x = bottom1.position.x + bottom1.size.width
+        if ground1.position.x < -ground1.size.width {
+            ground1.position.x = ground2.position.x + ground2.size.width
+        } else if ground2.position.x < -ground2.size.width {
+            ground2.position.x = ground1.position.x + ground1.size.width
         }
-        
-        // Move clouds
+    }
+    
+    func moveCloudsRight(cloud1Speed: CGFloat, cloud2Speed: CGFloat, cloud3Speed: CGFloat) {
         let cloud1 = childNode(withName: "cloud1") as! SKSpriteNode
         let cloud2 = childNode(withName: "cloud2") as! SKSpriteNode
         let cloud3 = childNode(withName: "cloud3") as! SKSpriteNode
         
-        cloud1.position.x += 1.5
-        cloud2.position.x += 2
-        cloud3.position.x += 1
+        cloud1.position.x += cloud1Speed
+        cloud2.position.x += cloud2Speed
+        cloud3.position.x += cloud3Speed
         
         let clouds = [cloud1, cloud2, cloud3]
         for cloud in clouds {
             if cloud.position.x > self.size.width + cloud.size.width / 2 {
                 cloud.position.x = 0 - cloud.size.width / 2
             }
+        }
+    }
+    
+    func initiateJump(initialVelocity: CGFloat) {
+        if playerIsOnTheGround {
+            velocity = initialVelocity
+            playerIsOnTheGround = false
+        }
+    }
+    
+    func updateJumpMotion(slowDown: CGFloat) {
+        velocity -= slowDown
+        player.position.y += velocity
+        if player.position.y <= ground1.size.height {
+            player.position.y = ground1.size.height
+            velocity = 0
+            playerIsOnTheGround = true
         }
     }
 }
