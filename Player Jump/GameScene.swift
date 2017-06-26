@@ -17,6 +17,7 @@ class GameScene: SKScene {
     
     override func didMove(to view: SKView) {
         
+        // Background
         self.backgroundColor = SKColor.lightGray
         
         bottom1.anchorPoint = CGPoint.zero
@@ -29,12 +30,36 @@ class GameScene: SKScene {
         bottom2.zPosition = 1
         self.addChild(bottom2)
         
+        // Player
         player.position = CGPoint(x: player.size.width / 2, y: bottom1.size.height + player.size.height / 2)
         player.zPosition = 2
         self.addChild(player)
+        
+        // Clouds
+        addCloud(named: "cloud1", at: CGPoint(x: self.size.width * 0.3, y: self.size.height * 0.8), scale: 1.5)
+        addCloud(named: "cloud2", at: CGPoint(x: self.size.width * 0.6, y: self.size.height * 0.65), scale: 2)
+        addCloud(named: "cloud3", at: CGPoint(x: self.size.width * 0.5, y: self.size.height * 0.45), scale: 2.5)
+    }
+    
+    func addCloud(named name: String, at position: CGPoint, scale: CGFloat) {
+        let cloud = SKSpriteNode(imageNamed: "Wolke")
+        cloud.name = name
+        cloud.position = position
+        cloud.setScale(scale)
+        cloud.zPosition = 1
+        self.addChild(cloud)
     }
     
     override func update(_ currentTime: TimeInterval) {
         player.zRotation -= CGFloat.pi * 5 / 180
+        
+        bottom1.position.x -= 4
+        bottom2.position.x -= 4
+        
+        if bottom1.position.x < -bottom1.size.width {
+            bottom1.position.x = bottom2.position.x + bottom2.size.width
+        } else if bottom2.position.x < -bottom2.size.width {
+            bottom2.position.x = bottom1.position.x + bottom1.size.width
+        }
     }
 }
