@@ -53,6 +53,7 @@ class GameScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         player.zRotation -= CGFloat.pi * 5 / 180
         
+        // Move floor
         bottom1.position.x -= 4
         bottom2.position.x -= 4
         
@@ -60,6 +61,22 @@ class GameScene: SKScene {
             bottom1.position.x = bottom2.position.x + bottom2.size.width
         } else if bottom2.position.x < -bottom2.size.width {
             bottom2.position.x = bottom1.position.x + bottom1.size.width
+        }
+        
+        // Move clouds
+        let cloud1 = childNode(withName: "cloud1") as! SKSpriteNode
+        let cloud2 = childNode(withName: "cloud2") as! SKSpriteNode
+        let cloud3 = childNode(withName: "cloud3") as! SKSpriteNode
+        
+        cloud1.position.x += 2
+        cloud2.position.x += 1
+        cloud3.position.x += 1.5
+        
+        let clouds = [cloud1, cloud2, cloud3]
+        for cloud in clouds {
+            if cloud.position.x > self.size.width + cloud.size.width / 2 {
+                cloud.position.x = 0 - cloud.size.width / 2
+            }
         }
     }
 }
