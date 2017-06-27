@@ -15,6 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let ground1 = SKSpriteNode(imageNamed: "Bottom")
     let ground2 = SKSpriteNode(imageNamed: "Bottom")
     let player = SKSpriteNode(imageNamed: "Player")
+    let button = SKSpriteNode(imageNamed: "Playbutton")
     
     // Jumping
     var playerIsOnTheGround = true
@@ -66,6 +67,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Wall
         addWall(named: "wall1", xScale: 1, yScale: 1.5, xPoint: 0)
+        
+        // Button
+        button.position = CGPoint(x: self.size.width / 2, y: self.size.height * 0.4)
+        button.zPosition = 3
+        button.run(SKAction.hide())
+        self.addChild(button)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -73,14 +80,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         moveGroundLeft(points: 4)
         moveCloudsRight(cloud1Speed: 1.5, cloud2Speed: 2, cloud3Speed: 1)
         updateJumpMotion(slowDown: 0.6)
-        
-        let wall = childNode(withName: "wall1") as! SKSpriteNode
-        wall.position.x -= wallSpeed
-        if wall.position.x < (0 - wall.size.width) {
-            wall.position.x = self.size.width + (2 * wall.size.width) + 20
-            wall.yScale = CGFloat(arc4random_uniform(UInt32(2.5))) + 0.5
-            wallSpeed = CGFloat(arc4random_uniform(UInt32(6))) + 4
-        }
+        updateWallMotion()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -102,6 +102,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             return
         }
         
+        addGameOverLabel()
+        button.run(SKAction.unhide())
         player.removeFromParent()
     }
     
@@ -129,6 +131,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(wall)
     }
     
+    func addGameOverLabel() {
+        let label = SKLabelNode(text: "Game Over")
+        label.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
+        label.fontSize = self.size.height / 18
+        label.fontColor = SKColor.black
+        label.zPosition = 3
+        self.addChild(label)
+    }
     
     func moveGroundLeft(points: CGFloat) {
         ground1.position.x -= points
@@ -162,8 +172,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if playerIsOnTheGround {
             jumpVelocity = initialVelocity
             playerIsOnTheGround = false
-            jumpAudioPlayer.prepareToPlay()
             jumpAudioPlayer.play()
+            jumpAudioPlayer.prepareToPlay()
         }
     }
     
@@ -177,6 +187,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    func updateWallMotion() {
+        let wall = childNode(withName: "wall1") as! SKSpriteNode
+        wall.position.x -= wallSpeed
+        if wall.position.x < (0 - wall.size.width) {
+            wall.position.x = self.size.width + (2 * wall.size.width) + 20
+            wall.yScale = CGFloat(arc4random_uniform(UInt32(2.5))) + 0.5
+            wallSpeed = CGFloat(arc4random_uniform(UInt32(6))) + 4
+        }
+    }
+    
     func prepareJumpSound() {
         let jumpAudioURL = Bundle.main.url(forResource: "Jump", withExtension: "wav")
         do {
@@ -185,5 +205,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             print("Audio file not found")
         }
         jumpAudioPlayer.numberOfLoops = 1
+        jumpAudioPlayer.prepareToPlay()
     }
 }
