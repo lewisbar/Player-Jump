@@ -21,6 +21,8 @@ class GameScene: SKScene {
     var jumpVelocity: CGFloat = 0
     var jumpAudioPlayer: AVAudioPlayer!
     
+    var wallSpeed: CGFloat = 5
+    
     override func didMove(to view: SKView) {
         
         // Background
@@ -49,6 +51,9 @@ class GameScene: SKScene {
         
         // Audio
         prepareJumpSound()
+        
+        // Wall
+        addWall(named: "wall1", xScale: 1, yScale: 1.5, xPoint: 0)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -56,6 +61,14 @@ class GameScene: SKScene {
         moveGroundLeft(points: 4)
         moveCloudsRight(cloud1Speed: 1.5, cloud2Speed: 2, cloud3Speed: 1)
         updateJumpMotion(slowDown: 0.6)
+        
+        let wall = childNode(withName: "wall1") as! SKSpriteNode
+        wall.position.x -= wallSpeed
+        if wall.position.x < -wall.size.width {
+            wall.position.x = self.size.width + (2 * wall.size.width) + 20
+            wall.yScale = CGFloat(arc4random_uniform(UInt32(2.5))) + 0.5
+            wallSpeed = CGFloat(arc4random_uniform(UInt32(6))) + 4
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -69,6 +82,17 @@ class GameScene: SKScene {
         cloud.setScale(scale)
         cloud.zPosition = 1
         self.addChild(cloud)
+    }
+    
+    func addWall(named name: String, xScale: CGFloat, yScale: CGFloat, xPoint: CGFloat) {
+        let wall = SKSpriteNode(imageNamed: "Balken")
+        wall.name = name
+        wall.xScale = xScale
+        wall.yScale = yScale
+        wall.anchorPoint = .zero
+        wall.position = CGPoint(x: self.size.width + (2 * wall.size.width) + xPoint, y: ground1.size.height - 16)
+        wall.zPosition = 2
+        self.addChild(wall)
     }
     
     func moveGroundLeft(points: CGFloat) {
@@ -103,6 +127,7 @@ class GameScene: SKScene {
         if playerIsOnTheGround {
             jumpVelocity = initialVelocity
             playerIsOnTheGround = false
+            jumpAudioPlayer.prepareToPlay()
             jumpAudioPlayer.play()
         }
     }
@@ -125,6 +150,5 @@ class GameScene: SKScene {
             print("Audio file not found")
         }
         jumpAudioPlayer.numberOfLoops = 1
-        jumpAudioPlayer.prepareToPlay()
     }
 }
