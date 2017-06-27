@@ -9,7 +9,7 @@
 import SpriteKit
 import AVFoundation
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Nodes
     let ground1 = SKSpriteNode(imageNamed: "Bottom")
@@ -23,7 +23,15 @@ class GameScene: SKScene {
     
     var wallSpeed: CGFloat = 5
     
+    struct BitMasks {
+        static let player: UInt32 = 0b1
+        static let wall: UInt32 = 0b10
+    }
+    
     override func didMove(to view: SKView) {
+        
+        // Physics
+        self.physicsWorld.contactDelegate = self
         
         // Background
         self.backgroundColor = SKColor.lightGray
@@ -42,6 +50,10 @@ class GameScene: SKScene {
         // Player
         player.position = CGPoint(x: player.size.width, y: ground1.size.height + player.size.height / 2)
         player.zPosition = 2
+        player.physicsBody = SKPhysicsBody(circleOfRadius: player.size.width / 2)
+        player.physicsBody?.affectedByGravity = false
+        player.physicsBody?.categoryBitMask = BitMasks.player
+        player.physicsBody?.contactTestBitMask = BitMasks.wall
         self.addChild(player)
         
         // Clouds
@@ -64,7 +76,7 @@ class GameScene: SKScene {
         
         let wall = childNode(withName: "wall1") as! SKSpriteNode
         wall.position.x -= wallSpeed
-        if wall.position.x < -wall.size.width {
+        if wall.position.x < (0 - wall.size.width) {
             wall.position.x = self.size.width + (2 * wall.size.width) + 20
             wall.yScale = CGFloat(arc4random_uniform(UInt32(2.5))) + 0.5
             wallSpeed = CGFloat(arc4random_uniform(UInt32(6))) + 4
@@ -73,6 +85,24 @@ class GameScene: SKScene {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         initiateJump(initialVelocity: 16)
+    }
+    
+    // PhysicsContact
+    func didBegin(_ contact: SKPhysicsContact) {
+        var playerBody: SKPhysicsBody
+        var wallBody: SKPhysicsBody
+        
+        if contact.bodyA == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
+            playerBody = contact.bodyA
+            wallBody = contact.bodyB
+        } else if contact.bodyB == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
+            playerBody = contact.bodyB
+            wallBody = contact.bodyA
+        } else {
+            return
+        }
+        
+        player.removeFromParent()
     }
     
     func addCloud(named name: String, at position: CGPoint, scale: CGFloat) {
@@ -92,8 +122,13 @@ class GameScene: SKScene {
         wall.anchorPoint = .zero
         wall.position = CGPoint(x: self.size.width + (2 * wall.size.width) + xPoint, y: ground1.size.height - 16)
         wall.zPosition = 2
+        wall.physicsBody = SKPhysicsBody(rectangleOf: wall.size, center: CGPoint(x: wall.size.width / 2, y: wall.size.height / 2))
+        wall.physicsBody?.isDynamic = false
+        wall.physicsBody?.categoryBitMask = BitMasks.wall
+        wall.physicsBody?.contactTestBitMask = BitMasks.player
         self.addChild(wall)
     }
+    
     
     func moveGroundLeft(points: CGFloat) {
         ground1.position.x -= points
