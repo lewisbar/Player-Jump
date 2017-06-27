@@ -15,7 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let ground1 = SKSpriteNode(imageNamed: "Bottom")
     let ground2 = SKSpriteNode(imageNamed: "Bottom")
     let player = SKSpriteNode(imageNamed: "Player")
-    let button = SKSpriteNode(imageNamed: "Playbutton")
+    let replayButton = SKSpriteNode(imageNamed: "Playbutton")
     
     // Jumping
     var playerIsOnTheGround = true
@@ -69,10 +69,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addWall(named: "wall1", xScale: 1, yScale: 1.5, xPoint: 0)
         
         // Button
-        button.position = CGPoint(x: self.size.width / 2, y: self.size.height * 0.4)
-        button.zPosition = 3
-        button.run(SKAction.hide())
-        self.addChild(button)
+        replayButton.position = CGPoint(x: self.size.width / 2, y: self.size.height * 0.4)
+        replayButton.zPosition = 3
+        replayButton.run(SKAction.hide())
+        self.addChild(replayButton)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -84,27 +84,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        initiateJump(initialVelocity: 16)
+        if children.contains(player), playerIsOnTheGround {
+            initiateJump(initialVelocity: 16)
+            return
+        }
+        
+        for touch in touches {
+            let fingerLocation = touch.location(in: self)
+            if atPoint(fingerLocation) == replayButton {
+                let gameScene = GameScene(size: self.size)
+                self.view?.presentScene(gameScene)
+            }
+        }
     }
     
     // PhysicsContact
     func didBegin(_ contact: SKPhysicsContact) {
-        var playerBody: SKPhysicsBody
-        var wallBody: SKPhysicsBody
+//        var playerBody: SKPhysicsBody
+//        var wallBody: SKPhysicsBody
+//
+//        if contact.bodyA == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
+//            playerBody = contact.bodyA
+//            wallBody = contact.bodyB
+//        } else if contact.bodyB == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
+//            playerBody = contact.bodyB
+//            wallBody = contact.bodyA
+//        } else {
+//            return
+//        }
         
-        if contact.bodyA == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
-            playerBody = contact.bodyA
-            wallBody = contact.bodyB
-        } else if contact.bodyB == player.physicsBody, contact.bodyB.contactTestBitMask == BitMasks.wall {
-            playerBody = contact.bodyB
-            wallBody = contact.bodyA
-        } else {
-            return
-        }
-        
-        addGameOverLabel()
-        button.run(SKAction.unhide())
         player.removeFromParent()
+        addGameOverFire()
+        addGameOverLabel()
+        replayButton.run(SKAction.unhide())
     }
     
     func addCloud(named name: String, at position: CGPoint, scale: CGFloat) {
@@ -140,6 +152,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(label)
     }
     
+    func addGameOverFire() {
+        let fire = SKEmitterNode(fileNamed: "Fire.sks")
+        fire?.position = CGPoint(x: self.size.width / 2, y: self.size.height / 2)
+        fire?.zPosition = 2
+        self.addChild(fire!)
+    }
+    
     func moveGroundLeft(points: CGFloat) {
         ground1.position.x -= points
         ground2.position.x -= points
@@ -169,12 +188,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func initiateJump(initialVelocity: CGFloat) {
-        if playerIsOnTheGround {
-            jumpVelocity = initialVelocity
-            playerIsOnTheGround = false
-            jumpAudioPlayer.play()
-            jumpAudioPlayer.prepareToPlay()
-        }
+        jumpVelocity = initialVelocity
+        playerIsOnTheGround = false
+        jumpAudioPlayer.play()
+        jumpAudioPlayer.prepareToPlay()
     }
     
     func updateJumpMotion(slowDown: CGFloat) {
