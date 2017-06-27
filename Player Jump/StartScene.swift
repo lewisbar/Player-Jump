@@ -27,7 +27,8 @@ class StartScene: SKScene {
             
             if atPoint(userPosition) == startButton {
                 let gameScene = GameScene(size: self.size)
-                self.view?.presentScene(gameScene)
+                let fadeIn = SKTransition.fade(withDuration: 1)
+                self.view?.presentScene(gameScene, transition: fadeIn)
             }
         }
     }

@@ -93,7 +93,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let fingerLocation = touch.location(in: self)
             if atPoint(fingerLocation) == replayButton {
                 let gameScene = GameScene(size: self.size)
-                self.view?.presentScene(gameScene)
+                let fade = SKTransition.fade(with: SKColor.black, duration: 1)
+                self.view?.presentScene(gameScene, transition: fade)
             }
         }
     }
